@@ -23,41 +23,29 @@ var produk = []Produk{
 
 
 func main() {
-	// get produk by id
+	// get, update, delete produk by id
 	http.HandleFunc("/api/produk/", func(w http.ResponseWriter, r *http.Request) {
 		idStr := strings.TrimPrefix(r.URL.Path, "/api/produk/")
 		id, err := strconv.Atoi(idStr)
 		if (err != nil) {
-		w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Content-Type", "application/json")
 			http.Error(w, `{"message": "Invalid Produk ID"}`, http.StatusBadRequest)
 			return
 		}
 
-		for _, p := range produk {
-			if p.ID == id {
-				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(p)
-				return
-			}
-		}
-		w.Header().Set("Content-Type", "application/json")
-		http.Error(w, `{"message": "Produk Tidak Ditemukan"}`, http.StatusNotFound)
-	})
-
-	// add produk
-	http.HandleFunc("/api/produk", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(produk)
-		case "PUT":
-			idStr := strings.TrimPrefix(r.URL.Path, "/api/produk/")
-			id, err := strconv.Atoi(idStr)
-			if (err != nil) {
-				http.Error(w, "Invalid Produk ID", http.StatusBadRequest)
-				return
+			for _, p := range produk {
+				if p.ID == id {
+					w.Header().Set("Content-Type", "application/json")
+					json.NewEncoder(w).Encode(p)
+					return
+				}
 			}
-
+			w.Header().Set("Content-Type", "application/json")
+			http.Error(w, `{"message": "Produk Tidak Ditemukan"}`, http.StatusNotFound)
+		
+		case "PUT":
 			var p Produk
 			err = json.NewDecoder(r.Body).Decode(&p)
 			if (err != nil) {
@@ -66,7 +54,8 @@ func main() {
 			}
 
 			for i, prod := range produk {
-				if prod.ID == id {
+				if (prod.ID == id) {
+					p.ID = id
 					produk[i] = p
 					w.Header().Set("Content-Type", "application/json")
 					json.NewEncoder(w).Encode(p)
@@ -74,7 +63,32 @@ func main() {
 				}
 			}
 			
-			http.Error(w, "Produk Tidak Ditemukan", http.StatusNotFound)
+			w.Header().Set("Content-Type", "application/json")
+			http.Error(w, `{"message": "Produk Tidak Ditemukan"}`, http.StatusNotFound)
+
+		case "DELETE":
+			for i, prod := range produk {
+				if (prod.ID == id) {
+					produk = append(produk[:i], produk[i+1:]...)
+					w.Header().Set("Content-Type", "application/json")
+					json.NewEncoder(w).Encode(map[string]string{"message": "Produk Deleted"})
+					return
+				}
+			}
+			w.Header().Set("Content-Type", "application/json")
+			http.Error(w, `{"message": "Produk Tidak Ditemukan"}`, http.StatusNotFound)
+		default:
+			w.Header().Set("Content-Type", "application/json")
+			http.Error(w, `{"message": "Method Not Allowed"}`, http.StatusMethodNotAllowed)
+		}
+	})
+
+	// create, get all, delete produk
+	http.HandleFunc("/api/produk", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(produk)
 		default:
 			// baca data dari request & masukkan data kedalam produk
 			var produkBaru Produk
