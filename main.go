@@ -34,9 +34,6 @@ func main() {
 		DBConn: viper.GetString("DB_CONN"),
 	}
 
-	fmt.Println("Using driver: pgx")
-	fmt.Println("DB_CONN:", config.DBConn)
-
 	db, err := database.InitDB(config.DBConn)
 	if err != nil {
 		log.Fatal("Failed to initialize database:", err)
@@ -48,11 +45,15 @@ func main() {
 	productService := services.NewProductService(productRepo)
 	productHandler := handlers.NewProductHandler(productService)
 
-	// services.ProdukMain()
-	// services.KategoriMain()
+	categoryRepo := repositories.NewCategoryRepository(db)
+	categoryService := services.NewCategoryService(categoryRepo)
+	categoryHandler := handlers.NewCategoryHandler(categoryService)
+
 	// Setup routes
 	http.HandleFunc("/api/produk", productHandler.HandleProducts)
 	http.HandleFunc("/api/produk/", productHandler.HandleProductByID)
+	http.HandleFunc("/api/kategori", categoryHandler.HandleCategories)
+	http.HandleFunc("/api/kategori/", categoryHandler.HandleCategoryByID)
 
 	// health check
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {

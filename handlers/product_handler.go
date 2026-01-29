@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"kasir-api/models"
 	"kasir-api/services"
 	"net/http"
@@ -20,8 +19,6 @@ func NewProductHandler(service *services.ProductService) *ProductHandler {
 
 // HandleProducts - GET /api/produk
 func (h *ProductHandler) HandleProducts(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("HandleProducts method:", r.Method)
-
 	switch r.Method {
 	case http.MethodGet:
 		h.GetAll(w, r)
@@ -51,14 +48,19 @@ func (h *ProductHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var product models.Product
 	err := json.NewDecoder(r.Body).Decode(&product)
+
 	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid request body"})
 		return
 	}
 
 	err = h.service.Create(&product)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
 		return
 	}
 
@@ -92,7 +94,9 @@ func (h *ProductHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 
 	product, err := h.service.GetByID(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
 		return
 	}
 
@@ -104,21 +108,27 @@ func (h *ProductHandler) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/produk/")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid product ID", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid product ID"})
 		return
 	}
 
 	var product models.Product
 	err = json.NewDecoder(r.Body).Decode(&product)
 	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid request body"})
 		return
 	}
 
 	product.ID = id
 	err = h.service.Update(&product)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
 		return
 	}
 
@@ -131,13 +141,17 @@ func (h *ProductHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/produk/")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid product ID", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid product ID"})
 		return
 	}
 
 	err = h.service.Delete(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
 		return
 	}
 
