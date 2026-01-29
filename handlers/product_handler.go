@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"kasir-api/models"
 	"kasir-api/services"
 	"net/http"
@@ -19,6 +20,8 @@ func NewProductHandler(service *services.ProductService) *ProductHandler {
 
 // HandleProducts - GET /api/produk
 func (h *ProductHandler) HandleProducts(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("HandleProducts method:", r.Method)
+
 	switch r.Method {
 	case http.MethodGet:
 		h.GetAll(w, r)
