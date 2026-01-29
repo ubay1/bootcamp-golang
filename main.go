@@ -34,6 +34,9 @@ func main() {
 		DBConn: viper.GetString("DB_CONN"),
 	}
 
+	fmt.Println("Using driver: pgx")
+	fmt.Println("DB_CONN:", config.DBConn)
+
 	db, err := database.InitDB(config.DBConn)
 	if err != nil {
 		log.Fatal("Failed to initialize database:", err)

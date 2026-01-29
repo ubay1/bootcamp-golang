@@ -2,28 +2,25 @@ package database
 
 import (
 	"database/sql"
-	"log"
+	"time"
 
-	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-func InitDB(connectionString string) (*sql.DB, error) {
-	// Open database
-	db, err := sql.Open("postgres", connectionString)
+func InitDB(dsn string) (*sql.DB, error) {
+	db, err := sql.Open("pgx", dsn)
 	if err != nil {
 		return nil, err
 	}
 
-	// Test connection
-	err = db.Ping()
-	if err != nil {
+	// PENTING untuk PgBouncer transaction mode
+	db.SetMaxOpenConns(1)
+	db.SetMaxIdleConns(1)
+	db.SetConnMaxLifetime(time.Minute * 5)
+
+	if err := db.Ping(); err != nil {
 		return nil, err
 	}
 
-	// Set connection pool settings (optional tapi recommended)
-	db.SetMaxOpenConns(25)
-	db.SetMaxIdleConns(5)
-
-	log.Println("Database connected successfully")
 	return db, nil
 }
