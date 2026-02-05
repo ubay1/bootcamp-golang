@@ -19,6 +19,10 @@ func (s *TransactionService) Checkout(items []models.CheckoutItem) (*models.Tran
 	return s.repo.CreateTransaction(items)
 }
 
+func (s *TransactionService) SummaryToday() (*models.TransactionSummary, error) {
+	return s.repo.GetSummaryToday()
+}
+
 func (s *TransactionService) SummaryByDate(startDate string, endDate string) (*models.TransactionSummary, error) {
 	return s.repo.GetSummaryByDate(startDate, endDate)
 }

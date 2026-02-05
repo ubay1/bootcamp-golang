@@ -63,10 +63,7 @@ func (h *TransactionHandler) HandleSummaryToday(w http.ResponseWriter, r *http.R
 }
 
 func (h *TransactionHandler) ReportSummaryToday(w http.ResponseWriter, r *http.Request) {
-	startDate := r.URL.Query().Get("start_date")
-	endDate := r.URL.Query().Get("end_date")
-
-	summary, err := h.service.SummaryByDate(startDate, endDate)
+	summary, err := h.service.SummaryToday()
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
